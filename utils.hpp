@@ -4,6 +4,11 @@
 #include <fmt/core.h>
 
 namespace utils {
+  template<auto F>
+    struct scope_guard {
+      ~scope_guard() { F(); };
+    };
+
   inline bool eatChar(const char expected, std::string_view& inp) {
     if (inp.empty())
       throw std::invalid_argument(fmt::format("eatChar expected {} but no input remained", expected));
