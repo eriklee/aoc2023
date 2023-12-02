@@ -5,8 +5,8 @@ DBG_OPTS="-Wall --std=c++2b -lfmt -gdwarf -O0"
 ASAN_OPTS="-fsanitize=undefined -fsanitize=address -Wall --std=c++2b -lfmt -gdwarf -O0"
 OPTS="-Wall --std=c++2b -lfmt -g -O3"
 
-clang++ $OPTS -o bins/day1 day1.cpp
-#clang++ $OPTS -o bins/day2 day2.cpp
+#clang++ $OPTS -o bins/day1 day1.cpp
+clang++ $OPTS -o bins/day2 day2.cpp
 #clang++ $OPTS -o bins/day3 day3.cpp
 #clang++ $OPTS -o bins/day4 day4.cpp
 #clang++ $OPTS -o bins/day5 day5.cpp

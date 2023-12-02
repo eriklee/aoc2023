@@ -2,7 +2,7 @@
 ./build.sh
 
 ./bins/day1
-#./bins/day2
+./bins/day2
 #./bins/day3
 #./bins/day3
 #./bins/day4
