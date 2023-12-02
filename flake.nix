@@ -15,7 +15,6 @@
           buildInputs = [
             pkgs.fmt
             pkgs.boost181
-            pkgs.liburing
             pkgs.cmake
             pkgs.ninja
             pkgs.gdb
