@@ -26,7 +26,7 @@ int matchToVal(std::string_view m) {
 }
 
 int getCalibrationValuePart2(std::string line) {
-  std::regex cv_regex("\\d|(one)|(two)|(three)|(four)|(five)|(six)|(seven)|(eight)|(nine)");
+  static std::regex cv_regex("\\d|(one)|(two)|(three)|(four)|(five)|(six)|(seven)|(eight)|(nine)");
   int ret = 0;
   int last = 0;
   for (std::smatch sm; std::regex_search(line, sm, cv_regex);) {
