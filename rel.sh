@@ -12,5 +12,5 @@ set -x
 
 ## new hotness
 #cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Debug
-cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Release
+cmake -B build -GNinja -DCMAKE_BUILD_TYPE=RelWithDebInfo
 cmake --build build

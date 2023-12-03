@@ -2,6 +2,7 @@
 #include <charconv>
 #include <stdexcept>
 #include <fmt/core.h>
+#include <array>
 
 namespace utils {
   template<auto F>
@@ -36,4 +37,13 @@ namespace utils {
 
     return result;
   }
+
+  template<typename T>
+  void AssertEq(const T& x, const T& y) {
+    if (x != y) {
+      fmt::println("ASSERTION FAILED: {} != {}", x, y);
+      std::terminate();
+    }
+  }
+
 }
