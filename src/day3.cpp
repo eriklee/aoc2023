@@ -52,7 +52,7 @@ bool add_gear_part(gear_map& gm, int idx, uint64_t n) {
 }
 
 bool update_gear_map(const schematic& map, gear_map& gm, int n, int row, int n_start_col, int n_len) {
-  bool ret = false; 
+  bool ret = false;
   auto start_col = n_start_col == 0 ? 0 : n_start_col - 1;
   auto end_col = n_start_col + n_len;
   if (end_col == map[0].size()) --end_col;
@@ -81,41 +81,8 @@ bool update_gear_map(const schematic& map, gear_map& gm, int n, int row, int n_s
   return ret;
 }
 
-template<bool debug = false>
-int part1(const schematic& map) {
-  int ret = 0;
-  auto is_part_number_pred = [](const auto c) { return (c != '.' && !std::isdigit(c)); };
-  for (int r = 0; r < map.size(); ++r) {
-    const std::string line = map[r];
-    for (int c = 0; c < line.size(); ) {
-      std::string_view lv = {line.begin() + c, line.end()};
-      if (std::isdigit(lv.front())) {
-        auto original_sz = lv.size();
-        auto n = utils::parseInt(lv);
-        auto n_len = original_sz - lv.size();
-        auto ipn = check_perimeter(map, r, c, n_len, is_part_number_pred);
-        if constexpr (debug) {
-          if (ipn) fmt::print(fg(fmt::color::green), "{}", n);
-          else fmt::print(fg(fmt::color::dark_red), "{}", n);
-        }
-        ret += ipn ? n : 0;
-        c += n_len;
-      } else {
-        if constexpr(debug) {
-          if (line[c] == '.')
-            fmt::print(fg(fmt::color::gray), "{}", line[c]);
-          else
-            fmt::print(fmt::emphasis::bold, "{}", line[c]);
-        }
-        ++c;
-      }
-    }
-    if constexpr(debug) fmt::println("");
-  }
-  return ret;
-}
-
-void dbg_print2(const schematic& map, const gear_map& gm) {
+template<bool debug, typename F, typename G>
+void iterate(const schematic& map, F onNumber, G otherwise) {
   constexpr auto is_gear_part = [](auto c) { return c == '*'; };
   for (int r = 0; r < map.size(); ++r) {
     const std::string line = map[r];
@@ -125,56 +92,79 @@ void dbg_print2(const schematic& map, const gear_map& gm) {
         auto original_sz = lv.size();
         auto n = utils::parseInt(lv);
         auto n_len = original_sz - lv.size();
-        auto igp = check_perimeter(map, r, c, n_len, is_gear_part);
-        auto color = igp ? fg(fmt::color::green) : fg(fmt::color::gray);
-        fmt::print(color, "{}", n);
+        onNumber(r, c, n, n_len);
         c += n_len;
-      } else { 
-        auto color = fg(fmt::color::gray);
-        if (line[c] == '*') {
-          auto idx = r * line.size() + c;
-          if (gm.contains(idx) && gm.at(idx).size() == 2)
-            color = fg(fmt::color::light_green); 
-          else
-            color = fg(fmt::color::orange_red); 
-        }
-        fmt::print(color, "{}", line[c]);
+      } else {
+        otherwise(line[c], r * line.size() + c);
         ++c; }
     }
-    fmt::println("");
+    if constexpr (debug) fmt::println("");
   }
 }
 
 template<bool debug = false>
-uint64_t part2(const schematic& map) {
+uint64_t part1_iterate(const schematic& map) {
+  uint64_t ret = 0;
+  auto is_part_number_pred = [](const auto c) { return (c != '.' && !std::isdigit(c)); };
+  auto onNumber = [&map, &ret, &is_part_number_pred](auto row, auto col, auto n, auto n_len) {
+        auto ipn = check_perimeter(map, row, col, n_len, is_part_number_pred);
+        if constexpr (debug) {
+          if (ipn) fmt::print(fg(fmt::color::green), "{}", n);
+          else fmt::print(fg(fmt::color::dark_red), "{}", n);
+        }
+        ret += ipn ? n : 0;
+  };
+  auto onSymbol = [](auto s, auto _idx){
+        if constexpr(debug) {
+          if (s == '.')
+            fmt::print(fg(fmt::color::gray), "{}", s);
+          else
+            fmt::print(fmt::emphasis::bold, "{}", s);
+        }
+  };
+  iterate<debug>(map, onNumber, onSymbol);
+
+  return ret;
+}
+
+void dbg_print2_iter(const schematic& map, const gear_map& gm) {
+  constexpr auto is_gear_part = [](auto c) { return c == '*'; };
+  auto onNumber = [&map, is_gear_part](auto row, auto col, auto n, auto n_len) {
+        auto igp = check_perimeter(map, row, col, n_len, is_gear_part);
+        auto color = igp ? fg(fmt::color::green) : fg(fmt::color::gray);
+        fmt::print(color, "{}", n);
+  };
+  auto onSymbol = [&gm](auto s, auto idx) {
+        auto color = fg(fmt::color::gray);
+        if (s == '*') {
+          if (gm.contains(idx) && gm.at(idx).size() == 2)
+            color = fg(fmt::color::light_green);
+          else
+            color = fg(fmt::color::orange_red);
+        }
+        fmt::print(color, "{}", s);
+  };
+  iterate<true>(map, onNumber, onSymbol);
+}
+
+template<bool debug = false>
+uint64_t part2_iter(const schematic& map) {
   gear_map gm;
-  for (int r = 0; r < map.size(); ++r) {
-    const std::string line = map[r];
-    for (int c = 0; c < line.size(); ) {
-      std::string_view lv = {line.begin() + c, line.end()};
-      if (std::isdigit(lv.front())) {
-        auto original_sz = lv.size();
-        auto n = utils::parseInt(lv);
-        auto n_len = original_sz - lv.size();
-        auto igp = update_gear_map(map, gm, n, r, c, n_len);
+  auto onNumber = [&map, &gm](auto row, auto col, auto n, auto n_len) {
+        auto igp = update_gear_map(map, gm, n, row, col, n_len);
         if constexpr (debug) {
           auto color = igp ? fg(fmt::color::green) : fg(fmt::color::gray);
           fmt::print(color, "{}", n);
         }
-        c += n_len;
-      } else { 
+  };
+  auto onSymbol = [&gm](auto s, auto idx) {
         if constexpr (debug) {
-          auto color = line[c] == '*' ? fg(fmt::color::light_green) : fg(fmt::color::gray);
-          fmt::print(color, "{}", line[c]);
+          auto color = s == '*' ? fg(fmt::color::light_green) : fg(fmt::color::gray);
+          fmt::print(color, "{}", s);
         }
-        ++c; }
-    }
-    if constexpr(debug) fmt::println("");
-  }
-  if constexpr(debug) {
-    fmt::println("Part2 Gear Printout");
-    dbg_print2(map, gm);
-  }
+  };
+  iterate<debug>(map, onNumber, onSymbol);
+  if constexpr(debug) dbg_print2_iter(map, gm);
 
   uint64_t ret = 0;
   for (const auto [_k,vec] : gm) {
@@ -221,8 +211,8 @@ int main(int argc, char **argv) {
   while (std::getline(file, l)) {
     map.push_back(std::move(l));
   }
-  auto p1res = part1(map);
-  auto p2res = part2(map);
+  auto p1res = part1_iterate<false>(map);
+  auto p2res = part2_iter<false>(map);
   fmt::println("Day3: Part 1: {}", p1res);
   fmt::println("Day3: Part 2: {}", p2res);
 }
