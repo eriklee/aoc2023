@@ -24,6 +24,9 @@
             pkgs.clang-tools_16
             pkgs.clang_16
             pkgs.catch2_3
+            pkgs.hyperscan
+            pkgs.mimalloc
+            pkgs.gbenchmark
           ];
           shellHook = ''
             '';

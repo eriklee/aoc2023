@@ -29,6 +29,10 @@ namespace utils {
     return false;
   }
 
+  inline void eatSpaces(std::string_view& inp) {
+    while (!inp.empty() && inp.front() == ' ') inp.remove_prefix(1);
+  }
+
   inline int32_t parseInt(std::string_view& inp) {
     int32_t result;
     auto [ptr, ec] = std::from_chars(inp.data(), inp.data() + inp.size(), result);

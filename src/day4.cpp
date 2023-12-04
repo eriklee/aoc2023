@@ -5,6 +5,7 @@
 #include <string_view>
 #include <unordered_set>
 #include <deque>
+#include <bitset>
 
 int cardMatchCount(std::string_view line) {
   utils::eatLiteral("Card ", line);
@@ -12,16 +13,16 @@ int cardMatchCount(std::string_view line) {
   auto gameId = utils::parseInt(line);
   utils::eatLiteral(": ", line);
 
-  std::unordered_set<uint8_t> winners;
+  std::bitset<128> winners;
   while (line.front() != '|') {
     if (line.front() == ' ') utils::eatSpaces(line);
-    else winners.insert(utils::parseInt(line));
+    else winners.set(utils::parseInt(line));
   }
   utils::eatChar('|', line);
   uint64_t result = 0;
   while (!line.empty()) {
     if (line.front() == ' ') utils::eatSpaces(line);
-    else if (winners.contains(utils::parseInt(line))) result = ++result;
+    else if (winners.test(utils::parseInt(line))) result = ++result;
   }
 
   return result;
@@ -48,7 +49,7 @@ void test() {
 
 int main(int argc, char **argv) {
 
-  test();
+  // test();
   std::string l;
   {
     // std::ifstream file("inp/day4_test.txt");

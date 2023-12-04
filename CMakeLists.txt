@@ -12,6 +12,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -gdwarf")
 
 SET(CMAKE_CXX_STANDARD 23)
 enable_testing()
+find_package(mimalloc 2.1 REQUIRED)
+find_package(benchmark REQUIRED)
 
 add_library(utils INTERFACE)
 target_include_directories(utils INTERFACE include/)
@@ -28,4 +30,7 @@ add_executable(day3 src/day3.cpp)
 target_link_libraries(day3 utils fmt)
 
 add_executable(day4 src/day4.cpp)
-target_link_libraries(day4 utils fmt)
+target_link_libraries(day4 utils fmt mimalloc-static)
+
+add_executable(bench4 src/bench_day4.cpp)
+target_link_libraries(bench4 utils fmt benchmark::benchmark mimalloc-static)
