@@ -4,7 +4,7 @@ project(aoc2023)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 
 if(CMAKE_EXPORT_COMPILE_COMMANDS)
-  set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES 
+  set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES
       ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
 endif()
 
@@ -26,3 +26,6 @@ target_link_libraries(day2 utils fmt)
 
 add_executable(day3 src/day3.cpp)
 target_link_libraries(day3 utils fmt)
+
+add_executable(day4 src/day4.cpp)
+target_link_libraries(day4 utils fmt)
