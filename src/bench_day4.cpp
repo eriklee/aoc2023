@@ -85,6 +85,21 @@ static void BM_cmc_us(benchmark::State& state) {
     }
   }
 }
+
+static void BM_cmc_lr(benchmark::State& state) {
+
+  for (auto _ : state)
+  {
+    // std::ifstream file("inp/day4_test.txt");
+    auto lr = utils::LineReader("inp/day4.txt");
+    uint64_t p1 = 0;
+    while (auto l = lr.getLine()) {
+      auto matches = cardMatchCount_bs(*l);
+      p1 += cardValue(matches);
+    }
+  }
+}
 BENCHMARK(BM_cmc_us);
 BENCHMARK(BM_cmc_bs);
+BENCHMARK(BM_cmc_lr);
 BENCHMARK_MAIN();

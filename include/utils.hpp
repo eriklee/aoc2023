@@ -1,8 +1,13 @@
+#include <filesystem>
+#include <optional>
 #include <string_view>
 #include <charconv>
 #include <stdexcept>
 #include <fmt/core.h>
 #include <array>
+
+#include <fcntl.h>
+#include <sys/mman.h>
 
 namespace utils {
   template<auto F>
@@ -50,4 +55,31 @@ namespace utils {
     }
   }
 
+  class LineReader {
+    size_t bufidx_ = 0;
+    int fd_;
+    std::string_view view_;
+    void* map_data_;
+    size_t size_;
+
+    public:
+    LineReader(const std::string& filename) {
+      auto full_filename = std::filesystem::current_path().string() + "/" + filename;
+      fd_ = open(full_filename.c_str(), O_RDONLY);
+      if (fd_ == -1) throw std::runtime_error("invalid filename!");
+      size_ = std::filesystem::file_size(filename);
+      map_data_ = mmap(0,  size_, PROT_READ, MAP_PRIVATE, fd_, 0);
+      if (map_data_ == nullptr) throw std::runtime_error("mmap failed!");
+      view_ = std::string_view(reinterpret_cast<char*>(map_data_), size_);
+    }
+    ~LineReader() { close(fd_); }
+    std::optional<std::string_view> getLine() {
+      // find next \n
+      if (view_.empty()) return std::nullopt;
+      auto idx = view_.find('\n');
+      auto ret = view_.substr(0, idx);
+      view_.remove_prefix(idx + 1); // also remove the newline itself
+      return ret;
+    }
+  };
 }
