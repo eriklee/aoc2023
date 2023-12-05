@@ -39,7 +39,7 @@ struct pp {
 
 pp part1And2(std::string_view line) {
   utils::eatLiteral("Game ", line);
-  auto gameId = utils::parseInt(line);
+  int gameId = utils::parseInt(line);
   utils::eatLiteral(": ", line);
   // fmt::print("Game {}:", gameId);
   rgb minballs;
@@ -69,9 +69,9 @@ void test() {
   rgb t1{4,0,3};
   rgb t2{1,2,6};
   const auto res = combine(t1, t2);
-  assert(res.r == 4); 
-  assert(res.g == 2); 
-  assert(res.b == 6); 
+  assert(res.r == 4);
+  assert(res.g == 2);
+  assert(res.b == 6);
 }
 
 int main(int argc, char **argv) {

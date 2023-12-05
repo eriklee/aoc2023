@@ -9,6 +9,7 @@ if(CMAKE_EXPORT_COMPILE_COMMANDS)
 endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -gdwarf")
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=undefined")
 
 SET(CMAKE_CXX_STANDARD 23)
 enable_testing()

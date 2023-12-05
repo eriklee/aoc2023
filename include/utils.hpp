@@ -48,6 +48,13 @@ namespace utils {
   }
 
   template<typename T>
+  void Assert(const T& x) {
+    if (!x) {
+      fmt::println("ASSERTION FAILED: {}", x);
+      std::terminate();
+    }
+  }
+  template<typename T>
   void AssertEq(const T& x, const T& y) {
     if (x != y) {
       fmt::println("ASSERTION FAILED: {} != {}", x, y);

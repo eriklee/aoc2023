@@ -239,7 +239,6 @@ void test() {
   utils::AssertEq(sr[0].length, 14l);
   utils::AssertEq(sr[1].start, 55l);
   utils::AssertEq(sr[1].length, 13l);
-
 }
 
 int main(int argc, char **argv) {
