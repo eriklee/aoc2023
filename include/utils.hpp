@@ -38,8 +38,8 @@ namespace utils {
     while (!inp.empty() && inp.front() == ' ') inp.remove_prefix(1);
   }
 
-  inline int32_t parseInt(std::string_view& inp) {
-    int32_t result;
+  inline int64_t parseInt(std::string_view& inp) {
+    int64_t result;
     auto [ptr, ec] = std::from_chars(inp.data(), inp.data() + inp.size(), result);
     if (ec != std::errc()) throw std::invalid_argument("integer could not be parsed from value");
     inp.remove_prefix(ptr - inp.data());
