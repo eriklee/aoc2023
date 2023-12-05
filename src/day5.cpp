@@ -40,9 +40,6 @@ struct mapping {
   int64_t source_range_len;
 };
 
-using numbers = std::vector<int64_t>;
-using number_ranges = std::vector<range>;
-
 std::optional<int64_t> applyMapping(int64_t n, const mapping& mapping) {
   auto distance = n - mapping.source_range_start;
   if (distance > 0 && distance < mapping.source_range_len)
@@ -116,12 +113,16 @@ std::vector<range> parseSeedRanges(std::string_view line) {
   return result;
 }
 
-template<bool Debug>
-class almanac_runner {
+template<typename NumberT, bool Debug=false>
+class almanac_runner_t {
   public:
-    almanac_runner() = default;
+    using numbers = std::vector<NumberT>;
+    almanac_runner_t() = default;
 
-    void setInitialNumbers(numbers ns) { next_ = std::move(ns); }
+    void setInitialNumbers(numbers ns) {
+      next_ = std::move(ns);
+      if constexpr (Debug) fmt::println("seeds: {}", fmt::join(next_, ", "));
+    }
     numbers getFinalNumbers() { finishMapping(); return current_; }
 
     void feedLine(std::string_view line) {
@@ -150,84 +151,48 @@ class almanac_runner {
       next_.clear();
     }
 
-    void runMappingRule(mapping m) {
-      for (auto it = current_.begin(); it != current_.end(); ) {
-        if (auto nv = applyMapping(*it, m)) {
-          if constexpr (Debug) {
-            fmt::println("Rule {} mapped {} -> {}", currentMap_, *it, *nv);
-          }
-          next_.push_back(nv.value());
-          it = current_.erase(it);
-        } else ++it;
-      }
-    }
+    void runMappingRule(const mapping m) {
+      mapMappingRule<Debug>(currentMap_, current_, next_, m);
+    };
 
     std::string currentMap_ = "seeds";
     numbers current_;
     numbers next_;
 };
 
-template<bool Debug>
-class almanac_range_runner {
-  public:
-    almanac_range_runner() = default;
-
-    void setInitialNumbers(number_ranges ns) {
-      next_ = std::move(ns);
-      if constexpr (Debug) fmt::println("seeds: {}", fmt::join(next_, ", "));
-    }
-    number_ranges getFinalNumbers() { finishMapping(); return current_; }
-
-    void feedLine(std::string_view line) {
-      if (currentMap_ == "") {
-        utils::AssertEq(line.empty(), false);
-        utils::AssertEq(std::isdigit(line.front()), 0);
-        currentMap_ = line;
-      } else if (line == "") {
-        finishMapping();
-        currentMap_ = "";
-      } else {
-        auto m = parseMappingLine(line);
-        runMappingRule(m);
-      }
-    };
-  private:
-    // Finishes a "round" of mapping, putting all values back into current_ ready for the next
-    void finishMapping() {
-      // any numbers which didn't match are reused
-      // just need to add the ones we updated back to current_
+template<bool Debug=false>
+void mapMappingRule(const std::string& ruleType, std::vector<range>& current, std::vector<range>& next, const mapping m) {
+  for (auto idx = 0; idx < current.size(); ) {
+    auto mres = applyMapping(current[idx], m);
+    if (mres.result.length != 0)
+    {
       if constexpr (Debug) {
-        if (!current_.empty())
-          fmt::println("Rule {} left {} unchanged!", currentMap_, fmt::join(current_, ", "));
+        fmt::println("Rule {} mapped {} -> {} (pre={} suf={})", ruleType, current[idx], mres.result, mres.prefix, mres.suffix);
       }
-      current_.insert(current_.end(),  next_.begin(), next_.end());
-      next_.clear();
-    }
-
-    void runMappingRule(const mapping m) {
-      for (auto idx = 0; idx < current_.size(); ) {
-        auto mres = applyMapping(current_[idx], m);
-        if (mres.result.length != 0)
-        {
-          if constexpr (Debug) {
-            fmt::println("Rule {} mapped {} -> {} (pre={} suf={})", currentMap_, current_[idx], mres.result, mres.prefix, mres.suffix);
-          }
-          next_.push_back(mres.result);
-          current_.erase(current_.begin() + idx);
-          if (mres.prefix.length != 0) {
-            current_.push_back(mres.prefix);
-          }
-          if (mres.suffix.length != 0) {
-            current_.push_back(mres.suffix);
-          }
-        } else ++idx;
+      next.push_back(mres.result);
+      current.erase(current.begin() + idx);
+      if (mres.prefix.length != 0) {
+        current.push_back(mres.prefix);
       }
-    }
+      if (mres.suffix.length != 0) {
+        current.push_back(mres.suffix);
+      }
+    } else ++idx;
+  }
+}
 
-    std::string currentMap_ = "seeds";
-    number_ranges current_;
-    number_ranges next_;
-};
+template<bool Debug=false>
+void mapMappingRule(const std::string& ruleType, std::vector<int64_t>& current, std::vector<int64_t>& next, const mapping m) {
+  for (auto idx = 0; idx < current.size(); ) {
+    if (auto nv = applyMapping(current[idx], m)) {
+      if constexpr (Debug) {
+        fmt::println("Rule {} mapped {} -> {}", ruleType, current[idx], *nv);
+      }
+      next.push_back(nv.value());
+      current.erase(current.begin() + idx);
+    } else ++idx;
+  }
+}
 
 void test() {
   utils::AssertEq(applyMapping(79, {52, 50, 48}).value(), 81l);
@@ -250,8 +215,8 @@ int main(int argc, char **argv) {
   auto seeds = parseSeeds(seedLine);
   auto seedRanges = parseSeedRanges(seedLine);
 
-  almanac_runner<false> alm;
-  almanac_range_runner<false> alm_range;
+  almanac_runner_t<int64_t, false> alm;
+  almanac_runner_t<range, false> alm_range;
 
   alm.setInitialNumbers(seeds);
   alm_range.setInitialNumbers(seedRanges);
