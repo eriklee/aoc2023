@@ -38,3 +38,6 @@ target_link_libraries(bench4 utils fmt benchmark::benchmark mimalloc-static)
 
 add_executable(day5 src/day5.cpp)
 target_link_libraries(day5 utils fmt)
+
+add_executable(day6 src/day6.cpp)
+target_link_libraries(day6 utils fmt)

@@ -207,7 +207,7 @@ void test() {
 
 int main(int argc, char **argv) {
 
-  test();
+  // test();
   // utils::LineReader lr{"inp/day5_test.txt"};
   utils::LineReader lr{"inp/day5.txt"};
   auto seedLine = *lr.getLine();
