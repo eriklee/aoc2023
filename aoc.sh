@@ -8,3 +8,4 @@
 ./build/day4
 ./build/day5
 ./build/day6
+./build/day7
