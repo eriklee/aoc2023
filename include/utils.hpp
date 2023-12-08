@@ -47,6 +47,14 @@ namespace utils {
     return result;
   }
 
+  inline std::string_view readWord(std::string_view& inp) {
+    auto breakidx = inp.find(' ');
+    std::string_view result = inp.substr(0, breakidx);
+    inp.remove_prefix(breakidx);
+
+    return result;
+  }
+
   template<typename T>
   void Assert(const T& x) {
     if (!x) {

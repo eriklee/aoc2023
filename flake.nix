@@ -27,6 +27,7 @@
             pkgs.hyperscan
             pkgs.mimalloc
             pkgs.gbenchmark
+            pkgs.libhwy
           ];
           shellHook = ''
             '';
