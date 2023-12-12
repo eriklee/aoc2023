@@ -11,3 +11,4 @@
 ./build/day7
 ./build/day8
 ./build/day9
+./build/day10

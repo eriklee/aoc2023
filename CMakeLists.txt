@@ -50,3 +50,6 @@ target_link_libraries(day8 utils fmt)
 
 add_executable(day9 src/day9.cpp)
 target_link_libraries(day9 utils fmt)
+
+add_executable(day10 src/day10.cpp)
+target_link_libraries(day10 utils fmt)
