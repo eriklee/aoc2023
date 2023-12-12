@@ -146,7 +146,6 @@ int main(int argc, char **argv) {
   }
   auto p1 = part1<true>(diagram);
   fmt::println("Day10: Part 1: {}", p1);
-  // 6768?
   // auto p2 = part2<false>(instructions, graph);
   // fmt::println("Day9: Part 2: {}", p2);
 }
