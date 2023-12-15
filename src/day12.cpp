@@ -141,5 +141,5 @@ int main(int argc, char **argv) {
     // fmt::println("{} -> {}", *line, res);
   }
   fmt::println("Day12: Part 1: {}", p1);
-  fmt::println("Zay11: Part 2: {}", p2);
+  fmt::println("Day12: Part 2: {}", p2);
 }
