@@ -23,7 +23,7 @@ rgb combine(const rgb& l, const rgb&r) {
 }
 
 bool possible(const rgb& bs) {
-  return bs.r <= 12 && bs.g <= 13 && bs.b <= 14;
+  return bs.r <= 12 & bs.g <= 13 & bs.b <= 14;
 }
 
 struct pp {

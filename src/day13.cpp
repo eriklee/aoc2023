@@ -31,7 +31,7 @@ int distance(std::string_view l1, std::string_view l2) {
   return distance;
 }
 
-template<int SmudgeFactor, bool Debug = true>
+template<int SmudgeFactor, bool Debug = false>
 uint64_t findReflection(const pattern_t& pattern) {
   if constexpr (Debug) fmt::println("findReflection<{}> called:\n\t{}", SmudgeFactor, fmt::join(pattern, "\n\t"));
   // search for horizontal reflection

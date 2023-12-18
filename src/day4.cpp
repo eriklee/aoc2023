@@ -10,7 +10,7 @@
 int cardMatchCount(std::string_view line) {
   utils::eatLiteral("Card ", line);
   utils::eatSpaces(line);
-  auto gameId = utils::parseInt(line);
+  auto _gameId = utils::parseInt(line);
   utils::eatLiteral(": ", line);
 
   std::bitset<128> winners;

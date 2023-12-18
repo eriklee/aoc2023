@@ -144,7 +144,7 @@ int main(int argc, char **argv) {
   while (auto line = lr.getLine()) {
     diagram.push_back(*line);
   }
-  auto p1 = part1<true>(diagram);
+  auto p1 = part1<false>(diagram);
   fmt::println("Day10: Part 1: {}", p1);
   // auto p2 = part2<false>(instructions, graph);
   // fmt::println("Day9: Part 2: {}", p2);
