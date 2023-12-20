@@ -18,3 +18,4 @@
 ./build/day14
 ./build/day15
 ./build/day16
+./build/day17
