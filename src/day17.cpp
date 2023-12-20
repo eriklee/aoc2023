@@ -77,10 +77,46 @@ std::vector<state_t> nextSteps(state_t state) {
   return result;
 }
 
+std::vector<state_t> nextStepsP2(state_t state) {
+  std::vector<state_t> result;
+  result.reserve(4);
+  if (state.count <= 9) {
+    result.push_back(state);
+    moveState(result.back());
+  }
+
+  if (state.count > 3) {
+    using enum Direction;
+    result.push_back(state);
+    result.back().count = 0;
+    auto& a = result.back();
+    result.push_back(state);
+    result.back().count = 0;
+    auto& b = result.back();
+
+    if (state.dir == Up || state.dir == Down) {
+      a.dir = Left;
+      moveState(a);
+      b.dir = Right;
+      moveState(b);
+    } else if (state.dir == Left || state.dir == Right) {
+      a.dir = Up;
+      moveState(a);
+      b.dir = Down;
+      moveState(b);
+    }
+  }
+
+  return result;
+}
+
+template<int Part>
 std::vector<state_t> stepState(const map_t& cityMap, cache_t& cache, state_t state) {
   if (visit(cache, state)) return {};
 
-  auto next = nextSteps(state);
+  std::vector<state_t> next;
+  if constexpr (Part == 1) next = nextSteps(state);
+  if constexpr (Part == 2) next = nextStepsP2(state);
   for (auto it = next.begin(); it != next.end();) {
     if (it->row >= cityMap.size()) {
       it = next.erase(it);
@@ -102,6 +138,7 @@ void addToQ(std::vector<state_t>& vec, std::priority_queue<state_t>& q) {
   vec.clear();
 }
 
+template<int Part>
 int64_t runSearch(const map_t& map, cache_t& cache) {
   const auto initialLoss = 0;
   const auto goalRow = map.size() - 1;
@@ -114,7 +151,7 @@ int64_t runSearch(const map_t& map, cache_t& cache) {
   while (!q.empty()) {
     auto s = q.top();
     q.pop();
-    next = stepState(map, cache, s);
+    next = stepState<Part>(map, cache, s);
     for (const auto& s : next) {
       if (s.row == goalRow && s.col == goalCol) return -(s.heat_loss);
     }
@@ -137,11 +174,10 @@ int main(int argc, char **argv) {
   }
   cache_t cache;
 
-  auto p1 = runSearch(cityMap, cache);
+  auto p1 = runSearch<1>(cityMap, cache);
+  cache.clear();
+  auto p2 = runSearch<2>(cityMap, cache);
 
-  auto p2 = 0;
-
-
-  fmt::println("Day16: Part 1: {}", p1);
-  fmt::println("Day16: Part 2: {}", p2);
+  fmt::println("Day17: Part 1: {}", p1);
+  fmt::println("Day17: Part 2: {}", p2);
 }
