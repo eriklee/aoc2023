@@ -47,6 +47,15 @@ namespace utils {
     return result;
   }
 
+  inline int64_t parseHexInt(std::string_view& inp) {
+    int64_t result;
+    auto [ptr, ec] = std::from_chars(inp.data(), inp.data() + inp.size(), result, 16);
+    if (ec != std::errc()) throw std::invalid_argument("integer could not be parsed from value");
+    inp.remove_prefix(ptr - inp.data());
+
+    return result;
+  }
+
   inline std::string_view readWord(std::string_view& inp) {
     auto breakidx = inp.find(' ');
     std::string_view result = inp.substr(0, breakidx);
