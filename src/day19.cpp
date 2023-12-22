@@ -117,6 +117,149 @@ int64_t totalRatings(const ratings_t& part) {
   return part.x + part.m + part.a + part.s;
 }
 
+struct rating_bounds_t {
+  int x_min = 1;
+  int x_max = 4000;
+  int m_min = 1;
+  int m_max = 4000;
+  int a_min = 1;
+  int a_max = 4000;
+  int s_min = 1;
+  int s_max = 4000;
+};
+
+struct state_t {
+  rating_bounds_t ratings;
+  std::string wf_name;
+};
+
+bool validState(const state_t& st) {
+  if (st.wf_name == "R") return false;
+
+  return (st.ratings.x_min <= st.ratings.x_max)
+    && (st.ratings.m_min <= st.ratings.m_max)
+    && (st.ratings.a_min <= st.ratings.a_max)
+    && (st.ratings.s_min <= st.ratings.s_max);
+}
+
+std::pair<state_t, state_t> splitStateForRule(state_t state, rule_t rule) {
+  if (rule.num == -1) {
+    state.wf_name = rule.target_wf;
+    auto state2 = state;
+    state2.ratings.m_min = 4001;
+    return {state, state2};
+  }
+  if (rule.rating == 'x') {
+    if (rule.comp == '>') {
+      auto state2 = state;
+      state.ratings.x_min = rule.num + 1;
+      state.wf_name = rule.target_wf;
+      state2.ratings.x_max = rule.num;
+      return {state, state2};
+    }
+    else if (rule.comp == '<') {
+      auto state2 = state;
+      state.ratings.x_max = rule.num - 1;
+      state.wf_name = rule.target_wf;
+      state2.ratings.x_min = rule.num;
+      return {state, state2};
+    }
+  }
+  else if (rule.rating == 'm') {
+    if (rule.comp == '>') {
+      auto state2 = state;
+      state.ratings.m_min = rule.num + 1;
+      state.wf_name = rule.target_wf;
+      state2.ratings.m_max = rule.num;
+      return {state, state2};
+    }
+    else if (rule.comp == '<') {
+      auto state2 = state;
+      state.ratings.m_max = rule.num - 1;
+      state.wf_name = rule.target_wf;
+      state2.ratings.m_min = rule.num;
+      return {state, state2};
+    }
+  }
+  else if (rule.rating == 'a'){
+    if (rule.comp == '>') {
+      auto state2 = state;
+      state.ratings.a_min = rule.num + 1;
+      state.wf_name = rule.target_wf;
+      state2.ratings.a_max = rule.num;
+      return {state, state2};
+    }
+    else if (rule.comp == '<') {
+      auto state2 = state;
+      state.ratings.a_max = rule.num - 1;
+      state.wf_name = rule.target_wf;
+      state2.ratings.a_min = rule.num;
+      return {state, state2};
+    }
+  }
+  else if (rule.rating == 's'){
+    if (rule.comp == '>') {
+      auto state2 = state;
+      state.ratings.s_min = rule.num + 1;
+      state.wf_name = rule.target_wf;
+      state2.ratings.s_max = rule.num;
+      return {state, state2};
+    }
+    else if (rule.comp == '<') {
+      auto state2 = state;
+      state.ratings.s_max = rule.num - 1;
+      state.wf_name = rule.target_wf;
+      state2.ratings.s_min = rule.num;
+      return {state, state2};
+    }
+  }
+  __builtin_unreachable();
+}
+
+std::vector<state_t> nextStates(const std::vector<rule_t>& rules, state_t state) {
+  std::vector<state_t> result;
+  for (const auto rule : rules) {
+    const auto [s1,s2] = splitStateForRule(state, rule);
+    if (validState(s1)) result.push_back(s1);
+    if (!validState(s2))
+      break;
+    state = s2;
+  }
+
+  return result;
+}
+
+uint64_t countAcceptance(const state_t state) {
+  uint64_t result = 1;
+  result *= state.ratings.x_max - state.ratings.x_min + 1;
+  result *= state.ratings.m_max - state.ratings.m_min + 1;
+  result *= state.ratings.a_max - state.ratings.a_min + 1;
+  result *= state.ratings.s_max - state.ratings.s_min + 1;
+  return result;
+}
+
+uint64_t part2(const wfs_t& workflows) {
+  state_t initial_state = state_t{.ratings=rating_bounds_t{}, .wf_name="in"};
+  std::vector<state_t> q;
+  q.push_back(initial_state);
+  uint64_t result = 0;
+  while (!q.empty()) {
+    auto state = q.back();
+    q.pop_back();
+    if (state.wf_name == "A") {
+      // fmt::println("{} x{}/{} m{}/{} a{}/{} s{}/{}", state.wf_name, state.ratings.x_min, state.ratings.x_max, state.ratings.m_min, state.ratings.m_max, state.ratings.a_min, state.ratings.a_max, state.ratings.s_min, state.ratings.s_max);
+      // fmt::println("acceptances: {}", countAcceptance(state));
+      result += countAcceptance(state);
+      continue;
+    }
+    const auto& wf = workflows.at(state.wf_name);
+    auto next = nextStates(wf, state);
+    q.insert(q.end(), next.begin(), next.end());
+  }
+
+  return result;
+}
+
 void test() {
   auto part = parsePart("{x=787,m=2655,a=1222,s=2876}");
   utils::AssertEq(part.x, 787);
@@ -172,7 +315,7 @@ int main(int argc, char **argv) {
     }
   }
 
-  auto p2 = 0;
+  auto p2 = part2(workflows);
 
   fmt::println("Day19: Part 1: {}", p1);
   fmt::println("Day19: Part 2: {}", p2);
