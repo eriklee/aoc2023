@@ -56,12 +56,16 @@ namespace utils {
     return result;
   }
 
-  inline std::string_view readWord(std::string_view& inp) {
-    auto breakidx = inp.find(' ');
+  inline std::string_view readToChar(char c, std::string_view& inp) {
+    auto breakidx = inp.find(c);
     std::string_view result = inp.substr(0, breakidx);
-    inp.remove_prefix(breakidx);
+    inp.remove_prefix(result.size());
 
     return result;
+  }
+
+  inline std::string_view readWord(std::string_view& inp) {
+    return readToChar(' ', inp);
   }
 
   template<typename T>

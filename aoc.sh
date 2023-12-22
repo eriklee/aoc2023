@@ -21,3 +21,4 @@
 ./build/day17
 ./build/day18
 ./build/day19
+./build/day20
