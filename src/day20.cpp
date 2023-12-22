@@ -134,15 +134,30 @@ int64_t part1(std::unordered_map<std::string, module_t> mods) {
 }
 
 int64_t part2(std::unordered_map<std::string, module_t> mods) {
+  // Having a look at the graph there are 4 subgraphs that all feed into
+  // a conj result (rm). Some slight hinting suggested they might all be
+  // counters and the somewhat on-brand implication is that their periods
+  // can all be multiplied together to get the result.
   int64_t buttonPushes = 0;
+  const int goalCount = mods.at("broadcaster").outputs.size();
+  std::unordered_map<std::string, uint64_t> periods;
   pulse_q q;
   while (++buttonPushes) {
     q.emplace_back("button", "broadcaster", Pulse::Low);
     while (!q.empty()) {
       auto pulse = q.front();
       q.pop_front();
-      if (pulse.to == "rx" && pulse.val == Pulse::Low) break;
-      // fmt::println("{} -{}-> {}", pulse.from, (pulse.val == Pulse::High ? "high" : "low"), pulse.to);
+      if (pulse.to == "rm" && pulse.val == Pulse::High) {
+        if (!periods.contains(pulse.from)) {
+          // fmt::println("bc={} {} -{}-> {}", buttonPushes, pulse.from, (pulse.val == Pulse::High ? "high" : "low"), pulse.to);
+          periods.emplace(pulse.from, buttonPushes);
+        }
+        if (periods.size() == 4) {
+          int64_t result = 1;
+          for (const auto [_, v] : periods) result *= v;
+          return result;
+        }
+      }
       auto& mod = mods.at(pulse.to);
       auto morePulses = deliverPulse(mod, pulse);
       q.insert(q.end(), morePulses.begin(), morePulses.end());
@@ -150,6 +165,26 @@ int64_t part2(std::unordered_map<std::string, module_t> mods) {
   }
 
   return buttonPushes;
+}
+
+void dotPart2(const std::unordered_map<std::string, module_t>& mods) {
+  fmt::println("digraph {{ ");
+  for (const auto& [n, mod] : mods) {
+    auto lbl = n;
+    auto color = "black";
+    if (mod.typ == ModType::Conjunction) {
+      lbl = "&" + lbl;
+      color = "green";
+    }
+    if (mod.typ == ModType::FlipFlopOff){
+      lbl = "%" + lbl;
+      color = "red";
+    }
+    fmt::println("node [xlabel=\"{}\", color={}];", lbl, color);
+    fmt::println("{} -> {{{}}};", n, fmt::join(mod.outputs, ", "));
+  }
+
+  fmt::println(" }}");
 }
 
 int main(int argc, char **argv) {
@@ -166,7 +201,9 @@ int main(int argc, char **argv) {
 
   fixupModuleConnections(mods);
   auto p1 = part1(mods);
-  auto p2 = 0; // part2(mods);
+
+  // dotPart2(mods);
+  auto p2 = part2(mods);
 
   fmt::println("Day20: Part 1: {}", p1);
   fmt::println("Day20: Part 2: {}", p2);
